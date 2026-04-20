@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+data source db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id        String   @id @default(cuid())
+  name      String
+  plan      Plan     @default(FREE)
+  branches  Branch[]
+  staff     Staff[]
+  products  Product[]
+  customers Customer[]
+  createdAt DateTime @default(now())
+}
+
+model Branch {
+  id        String   @id @default(cuid())
+  name      String
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id])
+  orders    Order[]
+}
+
+model Staff {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  role         Role     @default(CASHIER)
+  companyId    String
+  company      Company  @relation(fields: [companyId], references: [id])
+  passwordHash String
+}
+
+model Product {
+  id         String   @id @default(cuid())
+  name       String
+  price      Float
+  stock      Int
+  companyId  String
+  company    Company  @relation(fields: [companyId], references: [id])
+  orderItems OrderItem[]
+}
+
+model Order {
+  id          String      @id @default(cuid())
+  branchId    String
+  branch      Branch      @relation(fields: [branchId], references: [id])
+  customerId  String?
+  items       OrderItem[]
+  total       Float
+  paymentType PaymentType
+  createdAt   DateTime    @default(now())
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id])
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int
+  unitPrice Float
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String?
+  points    Int      @default(0)
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id])
+}
+
+enum Role { OWNER MANAGER CASHIER }
+
+enum Plan { FREE BASIC PRO ENTERPRISE }
+
+enum PaymentType { CASH CARD }
