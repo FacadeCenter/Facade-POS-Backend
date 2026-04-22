@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import prisma from './config/db';
 import authRouter from './modules/auth/auth.routes';
+import staffRouter from './modules/staff/staff.routes';
 import companyRouter from './modules/company/company.routes';
 import branchRouter from './modules/branch/branch.routes';
 import productRouter from './modules/inventory/product.routes';
@@ -25,6 +26,7 @@ app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 
 // API routes
 app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/staff', staffRouter);
 
 // Protected routes
 app.use('/api/v1/companies', authMiddleware, companyRouter);
