@@ -37,7 +37,7 @@ app.use('/api/v1/inventory/categories', categoryRouter);
 app.use('/api/v1/pos/orders', authMiddleware, orderRouter);
 app.use('/api/v1/customers', authMiddleware, customerRouter);
 app.use('/api/v1/expenses', authMiddleware, expenseRouter);
-app.use('/api/v1/reports', authMiddleware, reportRouter);
+app.use('/api/v1/reports', reportRouter);
 
 // Handle 404
 app.all('*', (req, _res, next) => {
