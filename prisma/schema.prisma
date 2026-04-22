@@ -216,3 +216,15 @@ model Expense {
 
   @@map("expenses")
 }
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  module    String
+  userId    String
+  companyId String
+  details   Json?
+  createdAt DateTime @default(now())
+
+  @@map("audit_logs")
+}

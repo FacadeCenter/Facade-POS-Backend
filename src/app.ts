@@ -1,7 +1,10 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import dotenv from 'dotenv';
 import prisma from './config/db';
+import { logger } from './config/logger';
+import { rateLimiter, authRateLimiter } from './middlewares/rate-limiter.middleware';
 import authRouter from './modules/auth/auth.routes';
 import staffRouter from './modules/staff/staff.routes';
 import companyRouter from './modules/company/company.routes';
@@ -19,14 +22,16 @@ import { errorHandler, AppError } from './middlewares/error.middleware';
 dotenv.config();
 
 const app = express();
+app.use(helmet());
 app.use(cors({ origin: process.env.FRONTEND_URL }));
 app.use(express.json());
+app.use(rateLimiter);
 
 // Health check
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 
 // API routes
-app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/auth', authRateLimiter, authRouter);
 app.use('/api/v1/staff', staffRouter);
 
 // Protected routes
