@@ -12,6 +12,7 @@ import expenseRouter from './modules/expenses/expense.routes';
 import reportRouter from './modules/reports/report.routes';
 
 import { authMiddleware } from './middlewares/auth.middleware';
+import { errorHandler, AppError } from './middlewares/error.middleware';
 
 dotenv.config();
 
@@ -33,6 +34,14 @@ app.use('/api/v1/pos/orders', authMiddleware, orderRouter);
 app.use('/api/v1/customers', authMiddleware, customerRouter);
 app.use('/api/v1/expenses', authMiddleware, expenseRouter);
 app.use('/api/v1/reports', authMiddleware, reportRouter);
+
+// Handle 404
+app.all('*', (req, _res, next) => {
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+});
+
+// Global error handler
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
