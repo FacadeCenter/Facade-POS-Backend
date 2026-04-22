@@ -1,38 +1,15 @@
 import { Router } from 'express';
-import { z } from 'zod';
-import prisma from '../../config/db';
-import { AuthRequest } from '../../middlewares/auth.middleware';
+import { authMiddleware } from '../../middlewares/auth.middleware';
+import { branchController } from './branch.controller';
 
 const router = Router();
 
-const createSchema = z.object({
-  name: z.string().min(1),
-});
+router.use(authMiddleware);
 
-// List all branches for the tenant
-router.get('/', async (req: AuthRequest, res) => {
-  const companyId = req.user?.companyId;
-  const branches = await prisma.branch.findMany({
-    where: { companyId },
-  });
-  res.json({ success: true, data: branches });
-});
-
-// Create a new branch for the tenant
-router.post('/', async (req: AuthRequest, res) => {
-  const parse = createSchema.safeParse(req.body);
-  if (!parse.success) return res.status(400).json({ error: parse.error.issues });
-  
-  const companyId = req.user?.companyId;
-  if (!companyId) return res.status(400).json({ error: 'Company ID not found in token' });
-
-  const branch = await prisma.branch.create({ 
-    data: { 
-      ...parse.data, 
-      companyId 
-    } 
-  });
-  res.status(201).json({ success: true, data: branch });
-});
+router.get('/', branchController.getAll);
+router.get('/:id', branchController.getOne);
+router.post('/', branchController.create);
+router.put('/:id', branchController.update);
+router.delete('/:id', branchController.delete);
 
 export default router;

@@ -73,6 +73,61 @@ export class ReportService {
 
     return productDetails;
   }
+
+  async getSalesTrends(companyId: string, days: number = 7) {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    const sales = await prisma.order.findMany({
+      where: {
+        branch: { companyId },
+        status: 'COMPLETED',
+        createdAt: { gte: startDate },
+      },
+      select: {
+        total: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    const grouped = sales.reduce((acc: any, sale) => {
+      const date = sale.createdAt.toISOString().split('T')[0];
+      acc[date] = (acc[date] || 0) + sale.total;
+      return acc;
+    }, {});
+
+    return Object.entries(grouped).map(([date, total]) => ({ date, total }));
+  }
+
+  async getCategoryPerformance(companyId: string) {
+    const performance = await prisma.orderItem.groupBy({
+      by: ['productId'],
+      where: {
+        order: {
+          branch: { companyId },
+          status: 'COMPLETED',
+        },
+      },
+      _sum: {
+        total: true,
+      },
+    });
+
+    const categoryStats: any = {};
+
+    for (const item of performance) {
+      const product = await prisma.product.findUnique({
+        where: { id: item.productId },
+        include: { category: true },
+      });
+
+      const categoryName = product?.category?.name || 'Uncategorized';
+      categoryStats[categoryName] = (categoryStats[categoryName] || 0) + (item._sum.total || 0);
+    }
+
+    return Object.entries(categoryStats).map(([name, value]) => ({ name, value }));
+  }
 }
 
 export const reportService = new ReportService();

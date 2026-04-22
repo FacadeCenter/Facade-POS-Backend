@@ -37,9 +37,9 @@ app.use('/api/v1/staff', staffRouter);
 // Protected routes
 app.use('/api/v1/companies', authMiddleware, companyRouter);
 app.use('/api/v1/branches', authMiddleware, branchRouter);
-app.use('/api/v1/inventory/products', productRouter);
-app.use('/api/v1/inventory/categories', categoryRouter);
-app.use('/api/v1/pos/orders', authMiddleware, orderRouter);
+app.use('/api/v1/products', productRouter);
+app.use('/api/v1/categories', categoryRouter);
+app.use('/api/v1/sales', authMiddleware, orderRouter);
 app.use('/api/v1/customers', authMiddleware, customerRouter);
 app.use('/api/v1/expenses', authMiddleware, expenseRouter);
 app.use('/api/v1/reports', reportRouter);
@@ -53,6 +53,6 @@ app.all('*', (req, _res, next) => {
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+// app.listen moved to server.ts
 
 export default app;

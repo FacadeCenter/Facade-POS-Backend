@@ -7,6 +7,7 @@ const router = Router();
 router.use(authMiddleware);
 
 router.get('/', orderController.getAll);
+router.get('/stats', orderController.getStats);
 router.get('/:id', orderController.getOne);
 router.post('/', orderController.create);
 

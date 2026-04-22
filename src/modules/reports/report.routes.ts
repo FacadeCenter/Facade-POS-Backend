@@ -9,5 +9,7 @@ router.use(roleCheck(['OWNER', 'MANAGER']));
 
 router.get('/summary', reportController.getSummary);
 router.get('/top-products', reportController.getTopProducts);
+router.get('/trends', reportController.getTrends);
+router.get('/category-performance', reportController.getCategoryPerformance);
 
 export default router;

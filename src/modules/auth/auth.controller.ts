@@ -19,9 +19,12 @@ export class AuthController {
   async login(req: Request, res: Response, next: NextFunction) {
     try {
       const data = loginSchema.parse(req.body);
+      console.log('LOGIN ATTEMPT:', data.email);
       const result = await authService.login(data.email, data.password);
+      console.log('LOGIN SUCCESS:', data.email);
       res.json({ success: true, data: result });
-    } catch (error) {
+    } catch (error: any) {
+      console.error('LOGIN ERROR:', error.message);
       next(error);
     }
   }
@@ -31,6 +34,27 @@ export class AuthController {
       const data = registerSchema.parse(req.body);
       const result = await authService.register(data);
       res.status(201).json({ success: true, data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async branchLogin(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = loginSchema.parse(req.body);
+      const result = await authService.branchLogin(data.email, data.password);
+      res.json({ success: true, data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getCompanies(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const staffId = req.user?.id;
+      if (!staffId) throw new Error('Unauthorized');
+      const result = await authService.getCompanies(staffId);
+      res.json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
@@ -53,7 +77,6 @@ export class AuthController {
     try {
         const staffId = req.user?.id;
         if (!staffId) throw new Error('Unauthorized');
-        // Add logic to return current user info if needed
         res.json({ success: true, data: req.user });
     } catch (error) {
         next(error);

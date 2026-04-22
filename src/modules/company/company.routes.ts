@@ -6,6 +6,7 @@ const router = Router();
 
 const createSchema = z.object({
   name: z.string().min(1),
+  email: z.string().email(),
   plan: z.enum(['FREE','BASIC','PRO','ENTERPRISE']).optional(),
 });
 
@@ -18,10 +19,14 @@ router.get('/', async (_req, res) => {
 // Create a new company (onboarding)
 router.post('/', async (req, res) => {
   const parse = createSchema.safeParse(req.body);
-  if (!parse.success) return res.status(400).json({ error: parse.error.errors });
-  const { name, plan } = parse.data;
+  if (!parse.success) return res.status(400).json({ error: parse.error.issues });
+  const { name, email, plan } = parse.data;
   const company = await prisma.company.create({
-    data: { name, plan: plan as any || undefined },
+    data: { 
+      name, 
+      email,
+      plan: plan as any || undefined 
+    },
   });
   res.status(201).json(company);
 });

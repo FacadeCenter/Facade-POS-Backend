@@ -3,13 +3,43 @@ import { orderRepository } from './order.repository';
 import { AppError } from '../../middlewares/error.middleware';
 
 export class OrderService {
-  async getAllOrders(branchId: string) {
-    return orderRepository.findByBranch(branchId);
+  async getAllOrders(companyId: string, branchId?: string) {
+    if (branchId) {
+      return orderRepository.findByBranch(branchId);
+    }
+    return orderRepository.findByCompany(companyId);
   }
 
-  async getOrderById(id: string, branchId: string) {
+  async getStats(companyId: string, branchId?: string) {
+    const where: any = branchId ? { branchId } : { branch: { companyId } };
+    
+    // Simplistic stats calculation for demonstration
+    // In production, this would be a more complex aggregation query
+    const orders = await prisma.order.findMany({
+      where,
+      select: {
+        total: true,
+        status: true,
+        createdAt: true
+      }
+    });
+
+    const totalOrders = orders.length;
+    const completedOrders = orders.filter(o => o.status === 'COMPLETED').length;
+    const canceledOrders = orders.filter(o => o.status === 'CANCELLED').length;
+    const totalRevenue = orders.reduce((sum, o) => sum + (o.status === 'COMPLETED' ? o.total : 0), 0);
+
+    return {
+      totalOrders: { value: totalOrders, pctChange: 0 },
+      completedOrders: { value: completedOrders, pctChange: 0 },
+      canceledOrders: { value: canceledOrders, pctChange: 0 },
+      totalRevenue: { value: totalRevenue, pctChange: 0 }
+    };
+  }
+
+  async getOrderById(id: string, companyId: string) {
     const order = await orderRepository.findByIdWithDetails(id);
-    if (!order || order.branchId !== branchId) {
+    if (!order || (order as any).branch.companyId !== companyId) {
       throw new AppError('Order not found', 404);
     }
     return order;

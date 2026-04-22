@@ -31,6 +31,29 @@ export class ReportController {
       next(error);
     }
   }
+
+  async getTrends(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const companyId = req.user?.companyId;
+      if (!companyId) throw new Error('Unauthorized');
+      const { days } = req.query;
+      const trends = await reportService.getSalesTrends(companyId, days ? parseInt(days as string) : 7);
+      res.json({ success: true, data: trends });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getCategoryPerformance(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const companyId = req.user?.companyId;
+      if (!companyId) throw new Error('Unauthorized');
+      const performance = await reportService.getCategoryPerformance(companyId);
+      res.json({ success: true, data: performance });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export const reportController = new ReportController();

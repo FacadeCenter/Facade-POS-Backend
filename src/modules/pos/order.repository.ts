@@ -9,6 +9,32 @@ export class OrderRepository extends BaseRepository<Order> {
   async findByBranch(branchId: string): Promise<Order[]> {
     return this.model.findMany({
       where: { branchId },
+      include: { 
+        items: true,
+        branch: true,
+        customer: true,
+        staff: true
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+  }
+
+  async findByCompany(companyId: string): Promise<Order[]> {
+    return this.model.findMany({
+      where: { branch: { companyId } },
+      include: { 
+        items: true,
+        branch: true,
+        customer: true,
+        staff: true
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+  }
+
+  async findWithFilters(where: any): Promise<Order[]> {
+    return this.model.findMany({
+      where,
       include: {
         items: {
           include: {
@@ -16,7 +42,8 @@ export class OrderRepository extends BaseRepository<Order> {
           }
         },
         customer: true,
-        staff: true
+        staff: true,
+        branch: true
       },
       orderBy: { createdAt: 'desc' }
     });

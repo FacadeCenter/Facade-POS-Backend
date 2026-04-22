@@ -18,12 +18,55 @@ const orderSchema = z.object({
 });
 
 export class OrderController {
+  private formatOrder(order: any) {
+    return {
+      ...order,
+      orderId: order.id,
+      totalAmount: order.total,
+      orderStatus: order.status,
+      cashier: order.staff,
+      payments: [
+        {
+          paymentType: order.paymentType,
+          amount: order.total,
+          createdAt: order.createdAt,
+          paymentDetails: [
+            {
+              cashReceived: order.total,
+              changeToGive: 0,
+            }
+          ]
+        }
+      ],
+      orderItems: (order.items || []).map((it: any) => ({
+        ...it,
+        productName: it.product?.name || 'Unknown',
+        variantName: '',
+      }))
+    };
+  }
+
   async getAll(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const branchId = req.user?.branchId;
-      if (!branchId) throw new Error('Branch ID required');
-      const orders = await orderService.getAllOrders(branchId);
-      res.json({ success: true, data: orders });
+      const companyId = req.user?.companyId;
+      const branchId = req.query.branchId as string;
+      if (!companyId) throw new Error('Unauthorized');
+      
+      const orders = await orderService.getAllOrders(companyId, branchId);
+      res.json({ success: true, data: orders.map(this.formatOrder) });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getStats(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const companyId = req.user?.companyId;
+      const branchId = req.query.branchId as string;
+      if (!companyId) throw new Error('Unauthorized');
+
+      const stats = await orderService.getStats(companyId, branchId);
+      res.json({ success: true, data: stats });
     } catch (error) {
       next(error);
     }
@@ -32,10 +75,10 @@ export class OrderController {
   async getOne(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const branchId = req.user?.branchId;
-      if (!branchId) throw new Error('Branch ID required');
-      const order = await orderService.getOrderById(id, branchId);
-      res.json({ success: true, data: order });
+      const companyId = req.user?.companyId;
+      if (!companyId) throw new Error('Unauthorized');
+      const order = await orderService.getOrderById(id, companyId);
+      res.json({ success: true, data: this.formatOrder(order) });
     } catch (error) {
       next(error);
     }
@@ -43,13 +86,13 @@ export class OrderController {
 
   async create(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const branchId = req.user?.branchId;
+      const branchId = req.user?.branchId || req.body.branchId;
       const staffId = req.user?.id;
       if (!branchId || !staffId) throw new Error('Unauthorized or Branch ID missing');
 
       const data = orderSchema.parse(req.body);
       const order = await orderService.createOrder(data, branchId, staffId);
-      res.status(201).json({ success: true, data: order });
+      res.status(201).json({ success: true, data: this.formatOrder(order) });
     } catch (error) {
       next(error);
     }

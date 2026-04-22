@@ -16,6 +16,32 @@ const productSchema = z.object({
 });
 
 export class ProductController {
+  private formatProduct(product: any) {
+    return {
+      ...product,
+      productId: product.id,
+      brandName: '', // my schema doesn't have brand yet
+      options: [], // mock options
+      variants: [
+        {
+          variantId: `v-${product.id}`,
+          sku: product.sku || '',
+          sellingPrice: product.price,
+          basePrice: product.cost || product.price,
+          branchVariants: [
+            {
+              branchId: '', // generic
+              stockQty: product.stock,
+              stockUnit: 'Each',
+              availability: product.isActive,
+            }
+          ],
+          optionValues: [],
+        }
+      ]
+    };
+  }
+
   async getAll(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const companyId = req.user?.companyId;
@@ -27,7 +53,7 @@ export class ProductController {
       if (categoryId) filter.categoryId = categoryId as string;
 
       const products = await productService.getAllProducts(companyId, filter);
-      res.json({ success: true, data: products });
+      res.json({ success: true, data: products.map(this.formatProduct) });
     } catch (error) {
       next(error);
     }
@@ -39,7 +65,7 @@ export class ProductController {
       const companyId = req.user?.companyId;
       if (!companyId) throw new Error('Unauthorized');
       const product = await productService.getProductById(id, companyId);
-      res.json({ success: true, data: product });
+      res.json({ success: true, data: this.formatProduct(product) });
     } catch (error) {
       next(error);
     }
@@ -51,7 +77,7 @@ export class ProductController {
       if (!companyId) throw new Error('Unauthorized');
       const data = productSchema.parse(req.body);
       const product = await productService.createProduct(data, companyId);
-      res.status(201).json({ success: true, data: product });
+      res.status(201).json({ success: true, data: this.formatProduct(product) });
     } catch (error) {
       next(error);
     }
@@ -64,7 +90,7 @@ export class ProductController {
       if (!companyId) throw new Error('Unauthorized');
       const data = productSchema.partial().parse(req.body);
       const product = await productService.updateProduct(id, data, companyId);
-      res.json({ success: true, data: product });
+      res.json({ success: true, data: this.formatProduct(product) });
     } catch (error) {
       next(error);
     }

@@ -23,6 +23,11 @@ export const errorHandler = (
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
 
+  if (err.name === 'ZodError') {
+    err.statusCode = 400;
+    err.isOperational = true;
+  }
+
   if (process.env.NODE_ENV === 'development') {
     res.status(err.statusCode).json({
       success: false,
