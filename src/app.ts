@@ -7,6 +7,7 @@ import staffRouter from './modules/staff/staff.routes';
 import companyRouter from './modules/company/company.routes';
 import branchRouter from './modules/branch/branch.routes';
 import productRouter from './modules/inventory/product.routes';
+import categoryRouter from './modules/inventory/category.routes';
 import orderRouter from './modules/pos/order.routes';
 import customerRouter from './modules/customers/customer.routes';
 import expenseRouter from './modules/expenses/expense.routes';
@@ -31,7 +32,8 @@ app.use('/api/v1/staff', staffRouter);
 // Protected routes
 app.use('/api/v1/companies', authMiddleware, companyRouter);
 app.use('/api/v1/branches', authMiddleware, branchRouter);
-app.use('/api/v1/inventory/products', authMiddleware, productRouter);
+app.use('/api/v1/inventory/products', productRouter);
+app.use('/api/v1/inventory/categories', categoryRouter);
 app.use('/api/v1/pos/orders', authMiddleware, orderRouter);
 app.use('/api/v1/customers', authMiddleware, customerRouter);
 app.use('/api/v1/expenses', authMiddleware, expenseRouter);
