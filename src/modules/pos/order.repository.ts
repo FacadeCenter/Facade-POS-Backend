@@ -10,7 +10,9 @@ export class OrderRepository extends BaseRepository<Order> {
     return this.model.findMany({
       where: { branchId },
       include: { 
-        items: true,
+        items: {
+          include: { product: true }
+        },
         branch: true,
         customer: true,
         staff: true
@@ -23,7 +25,9 @@ export class OrderRepository extends BaseRepository<Order> {
     return this.model.findMany({
       where: { branch: { companyId } },
       include: { 
-        items: true,
+        items: {
+          include: { product: true }
+        },
         branch: true,
         customer: true,
         staff: true

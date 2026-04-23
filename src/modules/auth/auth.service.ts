@@ -25,25 +25,40 @@ export class AuthService {
       email: staff.email,
       name: staff.name,
       role: staff.role,
-      companyId: staff.companyId,
+      companyId: staff.companyId || '',
       companyName: (staffWithDetails as any).company?.name || '',
       branchId: staff.branchId || '',
       branchName: (staffWithDetails as any).branch?.name || '',
     };
   }
 
-  async register(data: { name: string; email: string; password: string; companyId: string }) {
+  async register(data: { name: string; email: string; password: string; companyId?: string; role?: string }) {
     const existing = await staffRepository.findByEmail(data.email);
     if (existing) {
       throw new AppError('Email already used', 409);
     }
 
     const hash = await bcrypt.hash(data.password, 10);
+    
+    let finalCompanyId = data.companyId;
+
+    // If no companyId provided, create a new company
+    if (!finalCompanyId) {
+      const company = await prisma.company.create({
+        data: {
+          name: data.name, // Use user's name as initial company name
+          email: data.email,
+        }
+      });
+      finalCompanyId = company.id;
+    }
+
     const staff = await staffRepository.create({
       name: data.name,
       email: data.email,
       passwordHash: hash,
-      companyId: data.companyId,
+      companyId: finalCompanyId,
+      role: (data.role as any) || 'TENANT_ADMIN',
     });
 
     const token = this.generateToken(staff);
@@ -102,7 +117,7 @@ export class AuthService {
       throw new AppError('Staff not found', 404);
     }
 
-    if (staff.role !== 'OWNER' && staff.companyId !== companyId) {
+    if (staff.role !== 'PLATFORM_ADMIN' && staff.role !== 'TENANT_ADMIN' && staff.companyId !== companyId) {
       throw new AppError('Forbidden', 403);
     }
 
@@ -129,6 +144,37 @@ export class AuthService {
       process.env.JWT_SECRET!,
       { expiresIn: (process.env.JWT_EXPIRES_IN as any) || '7d' }
     );
+  }
+
+  async getStoreInfo(companyId: string) {
+    const company = await prisma.company.findUnique({ where: { id: companyId } });
+    if (!company) throw new AppError('Company not found', 404);
+
+    return {
+      logoUrl: company.logoUrl,
+      telephone: company.phone || '',
+      businessType: 'RETAIL', // Hardcoded for now as it's not in schema
+      businessTypeId: company.id,
+      subscription: {
+          plan: company.plan,
+          status: 'ACTIVE',
+          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+      }
+    };
+  }
+
+  async getMe(staffId: string) {
+    const staff = await staffRepository.findById(staffId);
+    if (!staff) throw new AppError('Staff not found', 404);
+    
+    return {
+      id: staff.id,
+      name: staff.name,
+      email: staff.email,
+      role: staff.role,
+      companyId: staff.companyId,
+      branchId: staff.branchId
+    };
   }
 }
 

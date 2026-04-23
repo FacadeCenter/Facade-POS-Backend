@@ -16,7 +16,7 @@ const productSchema = z.object({
 });
 
 export class ProductController {
-  private formatProduct(product: any) {
+  private formatProduct = (product: any) => {
     return {
       ...product,
       productId: product.id,
@@ -42,7 +42,7 @@ export class ProductController {
     };
   }
 
-  async getAll(req: AuthRequest, res: Response, next: NextFunction) {
+  getAll = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const companyId = req.user?.companyId;
       if (!companyId) throw new Error('Unauthorized');
@@ -59,7 +59,7 @@ export class ProductController {
     }
   }
 
-  async getOne(req: AuthRequest, res: Response, next: NextFunction) {
+  getOne = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
       const companyId = req.user?.companyId;
@@ -71,7 +71,7 @@ export class ProductController {
     }
   }
 
-  async create(req: AuthRequest, res: Response, next: NextFunction) {
+  create = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const companyId = req.user?.companyId;
       if (!companyId) throw new Error('Unauthorized');
@@ -83,7 +83,7 @@ export class ProductController {
     }
   }
 
-  async update(req: AuthRequest, res: Response, next: NextFunction) {
+  update = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
       const companyId = req.user?.companyId;
@@ -96,7 +96,7 @@ export class ProductController {
     }
   }
 
-  async delete(req: AuthRequest, res: Response, next: NextFunction) {
+  delete = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
       const companyId = req.user?.companyId;
@@ -108,5 +108,6 @@ export class ProductController {
     }
   }
 }
+
 
 export const productController = new ProductController();

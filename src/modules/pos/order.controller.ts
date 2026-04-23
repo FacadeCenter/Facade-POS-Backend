@@ -18,35 +18,49 @@ const orderSchema = z.object({
 });
 
 export class OrderController {
-  private formatOrder(order: any) {
+  private formatOrder = (order: any) => {
     return {
       ...order,
-      orderId: order.id,
-      totalAmount: order.total,
-      orderStatus: order.status,
-      cashier: order.staff,
+      orderId:        order.id,
+      orderStatus:    order.status,
+      subTotal:       order.subtotal || 0,
+      discountAmount: order.discount || 0,
+      tax:            order.tax      || 0,
+      serviceCharge:  0, // not in schema yet
+      totalAmount:    order.total    || 0,
+      cashier:        order.staff    ? { ...order.staff, cashierId: order.staff.id, cashierNo: 'N/A' } : null,
+      branch:         order.branch   ? { ...order.branch, branchId: order.branch.id } : null,
+      customer:       order.customer ? { ...order.customer, customerId: order.customer.id } : null,
       payments: [
         {
-          paymentType: order.paymentType,
-          amount: order.total,
-          createdAt: order.createdAt,
+          paymentId:      `p-${order.id}`,
+          paymentType:    order.paymentType,
+          paymentStatus:  'COMPLETE',
+          createdAt:      order.createdAt,
           paymentDetails: [
             {
-              cashReceived: order.total,
-              changeToGive: 0,
+              paymentDetailsId: `pd-${order.id}`,
+              method:           order.paymentType,
+              amount:           order.total,
+              cashReceived:     order.total,
+              changeToGive:     0,
             }
           ]
         }
       ],
       orderItems: (order.items || []).map((it: any) => ({
         ...it,
+        orderItemId: it.id,
         productName: it.product?.name || 'Unknown',
         variantName: '',
+        sku:         it.product?.sku  || 'N/A',
+        unitPrice:   it.unitPrice     || 0,
       }))
     };
   }
 
-  async getAll(req: AuthRequest, res: Response, next: NextFunction) {
+
+  getAll = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const companyId = req.user?.companyId;
       const branchId = req.query.branchId as string;
@@ -59,7 +73,7 @@ export class OrderController {
     }
   }
 
-  async getStats(req: AuthRequest, res: Response, next: NextFunction) {
+  getStats = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const companyId = req.user?.companyId;
       const branchId = req.query.branchId as string;
@@ -72,7 +86,7 @@ export class OrderController {
     }
   }
 
-  async getOne(req: AuthRequest, res: Response, next: NextFunction) {
+  getOne = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
       const companyId = req.user?.companyId;
@@ -84,7 +98,7 @@ export class OrderController {
     }
   }
 
-  async create(req: AuthRequest, res: Response, next: NextFunction) {
+  create = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const branchId = req.user?.branchId || req.body.branchId;
       const staffId = req.user?.id;
@@ -98,5 +112,6 @@ export class OrderController {
     }
   }
 }
+
 
 export const orderController = new OrderController();

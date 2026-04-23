@@ -6,10 +6,10 @@ const router = Router();
 
 router.use(authMiddleware);
 
-router.get('/', roleCheck(['OWNER', 'MANAGER']), staffController.getAll);
-router.get('/:id', roleCheck(['OWNER', 'MANAGER']), staffController.getOne);
-router.post('/', roleCheck(['OWNER']), staffController.create);
-router.put('/:id', roleCheck(['OWNER']), staffController.update);
-router.delete('/:id', roleCheck(['OWNER']), staffController.delete);
+router.get('/', roleCheck(['TENANT_ADMIN', 'TENANT_MANAGER']), staffController.getAll);
+router.get('/:id', roleCheck(['TENANT_ADMIN', 'TENANT_MANAGER']), staffController.getOne);
+router.post('/', roleCheck(['TENANT_ADMIN']), staffController.create);
+router.put('/:id', roleCheck(['TENANT_ADMIN']), staffController.update);
+router.delete('/:id', roleCheck(['TENANT_ADMIN']), staffController.delete);
 
 export default router;

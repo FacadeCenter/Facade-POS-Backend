@@ -5,7 +5,7 @@ import { reportController } from './report.controller';
 const router = Router();
 
 router.use(authMiddleware);
-router.use(roleCheck(['OWNER', 'MANAGER']));
+router.use(roleCheck(['TENANT_ADMIN', 'TENANT_MANAGER']));
 
 router.get('/summary', reportController.getSummary);
 router.get('/top-products', reportController.getTopProducts);

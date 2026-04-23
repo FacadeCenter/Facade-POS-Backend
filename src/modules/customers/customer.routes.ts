@@ -6,6 +6,8 @@ const router = Router();
 
 router.use(authMiddleware);
 
+router.get('/stats', customerController.getStats);
+router.get('/search', customerController.search);
 router.get('/', customerController.getAll);
 router.get('/:id', customerController.getOne);
 router.post('/', customerController.create);

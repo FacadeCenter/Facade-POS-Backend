@@ -63,10 +63,10 @@ export class ReportService {
         });
         return {
           ...item,
-          productName: product?.name,
-          sku: product?.sku,
-          totalQuantity: item._sum.quantity,
-          totalRevenue: item._sum.total,
+          productName: product?.name || 'Unknown Product',
+          sku: product?.sku || 'N/A',
+          totalQuantity: item._sum.quantity || 0,
+          totalRevenue: item._sum.total || 0,
         };
       })
     );

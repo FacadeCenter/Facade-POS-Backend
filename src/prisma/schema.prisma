@@ -30,7 +30,7 @@ model Staff {
   id           String   @id @default(cuid())
   name         String
   email        String   @unique
-  role         Role     @default(CASHIER)
+  role         Role     @default(TENANT_CASHIER)
   companyId    String
   company      Company  @relation(fields: [companyId], references: [id])
   passwordHash String
@@ -76,7 +76,7 @@ model Customer {
   company   Company  @relation(fields: [companyId], references: [id])
 }
 
-enum Role { OWNER MANAGER CASHIER }
+enum Role { TENANT_ADMIN TENANT_MANAGER TENANT_CASHIER }
 
 enum Plan { FREE BASIC PRO ENTERPRISE }
 

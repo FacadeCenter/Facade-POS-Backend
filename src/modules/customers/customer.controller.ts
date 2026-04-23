@@ -22,6 +22,18 @@ export class CustomerController {
     }
   }
 
+  async search(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const companyId = req.user?.companyId;
+      const query = req.query.q as string;
+      if (!companyId) throw new Error('Unauthorized');
+      const customers = await customerService.searchCustomers(companyId, query);
+      res.json({ success: true, data: customers });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async getOne(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
@@ -66,6 +78,17 @@ export class CustomerController {
       if (!companyId) throw new Error('Unauthorized');
       await customerService.deleteCustomer(id, companyId);
       res.json({ success: true, message: 'Customer deleted successfully' });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getStats(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const companyId = req.user?.companyId;
+      if (!companyId) throw new Error('Unauthorized');
+      const stats = await customerService.getCustomerStats(companyId);
+      res.json({ success: true, data: stats });
     } catch (error) {
       next(error);
     }

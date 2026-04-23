@@ -10,9 +10,10 @@ datasource db {
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
 enum Role {
-  OWNER
-  MANAGER
-  CASHIER
+  PLATFORM_ADMIN
+  TENANT_ADMIN
+  TENANT_MANAGER
+  TENANT_CASHIER
 }
 
 enum Plan {
@@ -64,6 +65,7 @@ model Company {
   categories  Category[]
   customers   Customer[]
   expenses    Expense[]
+  suppliers   Supplier[]
 
   @@map("companies")
 }
@@ -90,14 +92,14 @@ model Staff {
   name         String
   email        String   @unique
   passwordHash String
-  role         Role     @default(CASHIER)
+  role         Role     @default(TENANT_CASHIER)
   isActive     Boolean  @default(true)
-  companyId    String
+  companyId    String?
   branchId     String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  company      Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company      Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
   branch       Branch?  @relation(fields: [branchId], references: [id], onDelete: SetNull)
   orders       Order[]
 
@@ -215,6 +217,25 @@ model Expense {
   company     Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   @@map("expenses")
+}
+
+model Supplier {
+  id          String   @id @default(cuid())
+  type        String   @default("INDIVIDUAL") // INDIVIDUAL or COMPANY
+  name        String
+  email       String?
+  phone       String?
+  address     String?
+  companyName String?
+  regNo       String?
+  coverArea   String?
+  companyId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("suppliers")
 }
 
 model AuditLog {

@@ -3,7 +3,7 @@ import { reportService } from './report.service';
 import { AuthRequest } from '../../middlewares/auth.middleware';
 
 export class ReportController {
-  async getSummary(req: AuthRequest, res: Response, next: NextFunction) {
+  getSummary = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const companyId = req.user?.companyId;
       if (!companyId) throw new Error('Unauthorized');
@@ -12,6 +12,10 @@ export class ReportController {
       const start = startDate ? new Date(startDate as string) : new Date(new Date().setDate(new Date().getDate() - 30));
       const end = endDate ? new Date(endDate as string) : new Date();
 
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        return res.status(400).json({ success: false, message: 'Invalid date format' });
+      }
+
       const summary = await reportService.getSalesSummary(companyId, start, end);
       res.json({ success: true, data: summary });
     } catch (error) {
@@ -19,7 +23,7 @@ export class ReportController {
     }
   }
 
-  async getTopProducts(req: AuthRequest, res: Response, next: NextFunction) {
+  getTopProducts = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const companyId = req.user?.companyId;
       if (!companyId) throw new Error('Unauthorized');
@@ -32,7 +36,7 @@ export class ReportController {
     }
   }
 
-  async getTrends(req: AuthRequest, res: Response, next: NextFunction) {
+  getTrends = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const companyId = req.user?.companyId;
       if (!companyId) throw new Error('Unauthorized');
@@ -44,7 +48,7 @@ export class ReportController {
     }
   }
 
-  async getCategoryPerformance(req: AuthRequest, res: Response, next: NextFunction) {
+  getCategoryPerformance = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const companyId = req.user?.companyId;
       if (!companyId) throw new Error('Unauthorized');
@@ -55,5 +59,6 @@ export class ReportController {
     }
   }
 }
+
 
 export const reportController = new ReportController();

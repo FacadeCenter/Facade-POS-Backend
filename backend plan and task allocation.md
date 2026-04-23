@@ -48,7 +48,7 @@ The system follows a **Monolithic Layered Architecture**, which is ideal for thi
 
 ### 4.1. User Management & Auth
 - **Authentication:** JWT-based login, Refresh Tokens, Password Reset (SMTP integration).
-- **Authorization:** Role-Based Access Control (RBAC) with roles: `OWNER`, `MANAGER`, `CASHIER`.
+- **Authorization:** Role-Based Access Control (RBAC) with roles: `TENANT_ADMIN`, `TENANT_MANAGER`, `TENANT_CASHIER`.
 - **Tenant Isolation:** Middleware to inject `companyId` into every request context.
 
 ### 4.2. Inventory Management

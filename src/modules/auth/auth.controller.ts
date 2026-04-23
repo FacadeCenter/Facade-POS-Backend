@@ -12,7 +12,8 @@ const registerSchema = z.object({
   name: z.string().min(1),
   email: z.string().email(),
   password: z.string().min(6),
-  companyId: z.string(),
+  companyId: z.string().optional(),
+  role: z.string().optional(),
 });
 
 export class AuthController {
@@ -77,9 +78,22 @@ export class AuthController {
     try {
         const staffId = req.user?.id;
         if (!staffId) throw new Error('Unauthorized');
-        res.json({ success: true, data: req.user });
+        
+        const staff = await authService.getMe(staffId);
+        res.json({ success: true, data: staff });
     } catch (error) {
         next(error);
+    }
+  }
+
+  async getStoreInfo(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const companyId = req.user?.companyId;
+      if (!companyId) throw new Error('Unauthorized');
+      const result = await authService.getStoreInfo(companyId);
+      res.json({ success: true, data: result });
+    } catch (error) {
+      next(error);
     }
   }
 }

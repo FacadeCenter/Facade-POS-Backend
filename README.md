@@ -43,8 +43,9 @@ The seed script (`npm run seed`) populates the database with a demo company, a b
 
 | Role | Email | Password | Access |
 | :--- | :--- | :--- | :--- |
-| **OWNER** | `admin@demo.com` | `password123` | Full admin dashboard & company settings |
-| **CASHIER** | `cashier@demo.com` | `password123` | Direct access to POS Dashboard |
+| **PLATFORM_ADMIN** | `super@saasprime.com` | `password123` | Platform-wide management (SaaS level) |
+| **TENANT_ADMIN** | `admin@demo.com` | `password123` | Full admin dashboard & company settings |
+| **TENANT_CASHIER** | `cashier@demo.com` | `password123` | Direct access to POS Dashboard |
 
 ---
 

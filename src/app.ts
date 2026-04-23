@@ -15,6 +15,9 @@ import orderRouter from './modules/pos/order.routes';
 import customerRouter from './modules/customers/customer.routes';
 import expenseRouter from './modules/expenses/expense.routes';
 import reportRouter from './modules/reports/report.routes';
+import supplierRouter from './modules/suppliers/supplier.routes';
+import discountRouter from './modules/discounts/discount.routes';
+import analyticsRouter from './modules/analytics/analytics.routes';
 
 import { authMiddleware } from './middlewares/auth.middleware';
 import { errorHandler, AppError } from './middlewares/error.middleware';
@@ -22,8 +25,13 @@ import { errorHandler, AppError } from './middlewares/error.middleware';
 dotenv.config();
 
 const app = express();
-app.use(helmet());
-app.use(cors({ origin: process.env.FRONTEND_URL }));
+app.use(helmet({ crossOriginResourcePolicy: false }));
+app.use(cors({ 
+  origin: [process.env.FRONTEND_URL || 'http://localhost:3000', 'http://localhost:3001', 'http://127.0.0.1:3000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-company-id', 'x-branch-id']
+}));
 app.use(express.json());
 app.use(rateLimiter);
 
@@ -43,6 +51,9 @@ app.use('/api/v1/sales', authMiddleware, orderRouter);
 app.use('/api/v1/customers', authMiddleware, customerRouter);
 app.use('/api/v1/expenses', authMiddleware, expenseRouter);
 app.use('/api/v1/reports', reportRouter);
+app.use('/api/v1/suppliers', authMiddleware, supplierRouter);
+app.use('/api/v1/discounts', authMiddleware, discountRouter);
+app.use('/api/v1/analytics', analyticsRouter);
 
 // Handle 404
 app.all('*', (req, _res, next) => {

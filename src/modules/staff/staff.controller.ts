@@ -6,7 +6,7 @@ import { z } from 'zod';
 const staffSchema = z.object({
   name: z.string().min(1),
   email: z.string().email(),
-  role: z.enum(['OWNER', 'MANAGER', 'CASHIER']),
+  role: z.enum(['TENANT_ADMIN', 'TENANT_MANAGER', 'TENANT_CASHIER']),
   branchId: z.string().optional(),
   password: z.string().min(6).optional(),
 });

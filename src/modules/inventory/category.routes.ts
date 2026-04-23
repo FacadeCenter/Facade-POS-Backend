@@ -8,8 +8,8 @@ router.use(authMiddleware);
 
 router.get('/', categoryController.getAll);
 router.get('/:id', categoryController.getOne);
-router.post('/', roleCheck(['OWNER', 'MANAGER']), categoryController.create);
-router.put('/:id', roleCheck(['OWNER', 'MANAGER']), categoryController.update);
-router.delete('/:id', roleCheck(['OWNER', 'MANAGER']), categoryController.delete);
+router.post('/', roleCheck(['TENANT_ADMIN', 'TENANT_MANAGER']), categoryController.create);
+router.put('/:id', roleCheck(['TENANT_ADMIN', 'TENANT_MANAGER']), categoryController.update);
+router.delete('/:id', roleCheck(['TENANT_ADMIN', 'TENANT_MANAGER']), categoryController.delete);
 
 export default router;

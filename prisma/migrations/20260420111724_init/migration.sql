@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "Role" AS ENUM ('OWNER', 'MANAGER', 'CASHIER');
+CREATE TYPE "Role" AS ENUM ('TENANT_ADMIN', 'TENANT_MANAGER', 'TENANT_CASHIER');
 
 -- CreateEnum
 CREATE TYPE "Plan" AS ENUM ('FREE', 'BASIC', 'PRO', 'ENTERPRISE');
@@ -49,7 +49,7 @@ CREATE TABLE "staff" (
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "passwordHash" TEXT NOT NULL,
-    "role" "Role" NOT NULL DEFAULT 'CASHIER',
+    "role" "Role" NOT NULL DEFAULT 'TENANT_CASHIER',
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "companyId" TEXT NOT NULL,
     "branchId" TEXT,

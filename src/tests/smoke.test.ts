@@ -21,7 +21,7 @@ describe('Backend Integration Tests', () => {
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.data.token).toBeDefined();
-    expect(res.body.data.role).toBe('OWNER');
+    expect(res.body.data.role).toBe('TENANT_ADMIN');
   });
 
   it('should fail login with wrong password', async () => {

@@ -1,39 +1,24 @@
 import { Router } from 'express';
-import { z } from 'zod';
-import prisma from '../../config/db';
-import { AuthRequest } from '../../middlewares/auth.middleware';
+import { expenseController } from './expense.controller';
+import { authMiddleware } from '../../middlewares/auth.middleware';
+import { ExpenseCategory } from '@prisma/client';
 
 const router = Router();
 
-const expenseSchema = z.object({
-  title: z.string().min(1),
-  amount: z.number().min(0),
+router.use(authMiddleware);
+
+// List all expense categories
+router.get('/categories/all', async (req, res) => {
+  const categories = Object.values(ExpenseCategory).map(cat => ({
+    categoryId: cat,
+    category: cat.charAt(0) + cat.slice(1).toLowerCase()
+  }));
+  res.json({ success: true, data: categories });
 });
 
-// List all expenses for the tenant
-router.get('/', async (req: AuthRequest, res) => {
-  const companyId = req.user?.companyId;
-  const expenses = await prisma.expense.findMany({
-    where: { companyId },
-  });
-  res.json({ success: true, data: expenses });
-});
-
-// Create a new expense for the tenant
-router.post('/', async (req: AuthRequest, res) => {
-  const parse = expenseSchema.safeParse(req.body);
-  if (!parse.success) return res.status(400).json({ error: parse.error.issues });
-  
-  const companyId = req.user?.companyId;
-  if (!companyId) return res.status(400).json({ error: 'Company ID not found in token' });
-
-  const expense = await prisma.expense.create({ 
-    data: { 
-      ...parse.data, 
-      companyId 
-    } 
-  });
-  res.status(201).json({ success: true, data: expense });
-});
+router.get('/stats', expenseController.getStats);
+router.get('/', expenseController.getAll);
+router.post('/', expenseController.create);
+router.delete('/:id', expenseController.delete);
 
 export default router;

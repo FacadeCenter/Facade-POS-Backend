@@ -3,7 +3,7 @@ import { AppError } from './error.middleware';
 
 export const rateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  max: 1000, // Limit each IP to 1000 requests per windowMs
   message: 'Too many requests from this IP, please try again after 15 minutes',
   handler: (req, res, next, options) => {
     next(new AppError(options.message, 429));
@@ -14,7 +14,7 @@ export const rateLimiter = rateLimit({
 
 export const authRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10, // Limit each IP to 10 login attempts per hour
+  max: 1000, // Limit each IP to 1000 login attempts per hour
   message: 'Too many login attempts from this IP, please try again after an hour',
   handler: (req, res, next, options) => {
     next(new AppError(options.message, 429));
