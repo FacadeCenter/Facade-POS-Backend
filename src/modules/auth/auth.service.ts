@@ -79,7 +79,7 @@ export class AuthService {
     // For branch login, we pick the first branch if none assigned, or the assigned one
     const branch = staff.branchId 
       ? await prisma.branch.findUnique({ where: { id: staff.branchId } })
-      : await prisma.branch.findFirst({ where: { companyId: staff.companyId } });
+      : await prisma.branch.findFirst({ where: { companyId: staff.companyId as string } });
 
     const staffWithDetails = await staffRepository.findWithDetails(staff.id);
     const token = jwt.sign(
