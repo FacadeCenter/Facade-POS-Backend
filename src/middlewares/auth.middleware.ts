@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { AppError } from './error.middleware';
+import { staffRepository } from '../modules/staff/staff.repository';
 
 export interface AuthRequest extends Request {
   user?: {
@@ -11,7 +12,7 @@ export interface AuthRequest extends Request {
   };
 }
 
-export const authMiddleware = (req: AuthRequest, _res: Response, next: NextFunction) => {
+export const authMiddleware = async (req: AuthRequest, _res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
   
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -22,7 +23,26 @@ export const authMiddleware = (req: AuthRequest, _res: Response, next: NextFunct
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as any;
-    req.user = decoded;
+    
+    // Check database for user existence, active status, and latest role/company
+    const staff = await staffRepository.findById(decoded.id);
+    
+    if (!staff) {
+      return next(new AppError('Unauthorized: User no longer exists', 401));
+    }
+
+    if (!staff.isActive) {
+      return next(new AppError('Unauthorized: Account is inactive', 401));
+    }
+
+    // Update req.user with DB values to ensure latest info
+    req.user = {
+      id: staff.id,
+      role: staff.role,
+      companyId: staff.companyId || undefined,
+      branchId: staff.branchId || undefined,
+    };
+
     next();
   } catch (error) {
     return next(new AppError('Unauthorized: Invalid token', 401));
