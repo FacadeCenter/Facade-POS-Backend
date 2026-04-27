@@ -7,8 +7,8 @@ const router = Router();
 router.post('/login', authController.login);
 router.post('/register', authController.register);
 router.post('/branch-login', authController.branchLogin);
-router.get('/companies', authMiddleware, authController.getCompanies);
-router.post('/select-company', authMiddleware, authController.selectCompany);
+// router.get('/companies', authMiddleware, authController.getCompanies);
+// router.post('/select-company', authMiddleware, authController.selectCompany);
 router.get('/me', authMiddleware, authController.getMe);
 router.get('/store-info', authMiddleware, authController.getStoreInfo);
 
