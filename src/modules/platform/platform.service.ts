@@ -12,11 +12,41 @@ export class PlatformService {
     });
     const globalRevenue = revenueResult._sum.total || 0;
 
+    // Get revenue trend (last 6 months)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+    sixMonthsAgo.setDate(1);
+    sixMonthsAgo.setHours(0, 0, 0, 0);
+
+    const monthlyRevenue = await prisma.order.groupBy({
+      by: ['createdAt'],
+      where: {
+        status: 'COMPLETED',
+        createdAt: { gte: sixMonthsAgo }
+      },
+      _sum: { total: true }
+    });
+
+    // Plan distribution
+    const planCounts = await prisma.company.groupBy({
+      by: ['plan'],
+      _count: { id: true }
+    });
+
+    // Support summary
+    const ticketSummary = await prisma.supportTicket.groupBy({
+      by: ['status'],
+      _count: { id: true }
+    });
+
     return {
       totalTenants,
       activeTenants,
       totalUsers,
-      globalRevenue
+      globalRevenue,
+      revenueTrend: monthlyRevenue, // Frontend will aggregate by month
+      planDistribution: planCounts.map(p => ({ name: p.plan, value: p._count.id })),
+      ticketSummary: ticketSummary.map(t => ({ status: t.status, count: t._count.id }))
     };
   }
 

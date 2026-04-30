@@ -85,7 +85,7 @@ export class AuthService {
     const token = jwt.sign(
       { id: staff.id, role: staff.role, companyId: staff.companyId, branchId: branch?.id },
       process.env.JWT_SECRET!,
-      { expiresIn: '8h' }
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
 
     return {
@@ -129,7 +129,7 @@ export class AuthService {
     const token = jwt.sign(
       { id: staff.id, role: staff.role, companyId: company.id },
       process.env.JWT_SECRET!,
-      { expiresIn: '8h' }
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
 
     return {
