@@ -27,6 +27,7 @@ enum Plan {
 enum PaymentType {
   CASH
   CARD
+  SPLIT
 }
 
 enum OrderStatus {
@@ -44,6 +45,45 @@ enum ExpenseCategory {
   MARKETING
   MAINTENANCE
   OTHER
+}
+
+enum DeviceStatus {
+  ONLINE
+  OFFLINE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  TRIAL
+}
+
+enum InvoiceStatus {
+  PAID
+  OPEN
+  OVERDUE
+  VOID
+}
+
+enum PaymentMethod {
+  CARD
+  BANK_TRANSFER
+  CASH
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
 }
 
 // ─── Models ──────────────────────────────────────────────────────────────────
@@ -68,6 +108,12 @@ model Company {
   expenses    Expense[]
   suppliers   Supplier[]
 
+  devices       Device[]
+  subscriptions Subscription[]
+  invoices      Invoice[]
+  tickets       SupportTicket[]
+  featureFlags  FeatureFlag[]
+
   @@map("companies")
 }
 
@@ -84,6 +130,7 @@ model Branch {
   company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   orders      Order[]
   staff       Staff[]
+  devices     Device[]
 
   @@map("branches")
 }
@@ -249,4 +296,92 @@ model AuditLog {
   createdAt DateTime @default(now())
 
   @@map("audit_logs")
+}
+
+model Device {
+  id          String       @id @default(cuid())
+  name        String
+  companyId   String
+  branchId    String
+  status      DeviceStatus @default(OFFLINE)
+  appVersion  String?
+  lastSyncAt  DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  company     Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch      Branch       @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@map("devices")
+}
+
+model Subscription {
+  id          String             @id @default(cuid())
+  companyId   String
+  plan        Plan
+  status      SubscriptionStatus @default(ACTIVE)
+  renewalDate DateTime?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  company     Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+model Invoice {
+  id          String        @id @default(cuid())
+  companyId   String
+  amount      Float
+  status      InvoiceStatus @default(OPEN)
+  dueDate     DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  company     Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  payments    Payment[]
+
+  @@map("invoices")
+}
+
+model Payment {
+  id          String        @id @default(cuid())
+  invoiceId   String
+  amount      Float
+  method      PaymentMethod @default(CARD)
+  createdAt   DateTime      @default(now())
+
+  invoice     Invoice       @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+model SupportTicket {
+  id          String         @id @default(cuid())
+  companyId   String
+  userId      String?
+  subject     String
+  description String?
+  status      TicketStatus   @default(OPEN)
+  priority    TicketPriority @default(MEDIUM)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  company     Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  @@map("support_tickets")
+}
+
+model FeatureFlag {
+  id          String   @id @default(cuid())
+  key         String
+  enabled     Boolean  @default(false)
+  companyId   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company     Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([key, companyId])
+  @@map("feature_flags")
 }

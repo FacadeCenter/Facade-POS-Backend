@@ -18,6 +18,7 @@ import reportRouter from './modules/reports/report.routes';
 import supplierRouter from './modules/suppliers/supplier.routes';
 import discountRouter from './modules/discounts/discount.routes';
 import analyticsRouter from './modules/analytics/analytics.routes';
+import platformRouter from './modules/platform/platform.routes';
 
 import { authMiddleware } from './middlewares/auth.middleware';
 import { errorHandler, AppError } from './middlewares/error.middleware';
@@ -54,6 +55,7 @@ app.use('/api/v1/reports', reportRouter);
 app.use('/api/v1/suppliers', authMiddleware, supplierRouter);
 app.use('/api/v1/discounts', authMiddleware, discountRouter);
 app.use('/api/v1/analytics', analyticsRouter);
+app.use('/api/v1/platform', platformRouter);
 
 // Handle 404
 app.all('*', (req, _res, next) => {

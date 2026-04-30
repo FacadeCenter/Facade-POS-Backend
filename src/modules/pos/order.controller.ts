@@ -4,13 +4,20 @@ import { AuthRequest } from '../../middlewares/auth.middleware';
 import { z } from 'zod';
 
 const orderItemSchema = z.object({
-  productId: z.string(),
+  variantId: z.string(),
   quantity: z.number().int().positive(),
+  unitPrice: z.number().positive(),
 });
 
 const orderSchema = z.object({
   customerId: z.string().optional(),
-  paymentType: z.enum(['CASH', 'CARD']),
+  payment: z.object({
+    paymentType: z.enum(['CASH', 'CARD', 'SPLIT']),
+    method: z.string(),
+    amount: z.number(),
+    cashReceived: z.number().optional(),
+    changeToGive: z.number().optional(),
+  }),
   items: z.array(orderItemSchema).min(1),
   discount: z.number().nonnegative().optional(),
   tax: z.number().nonnegative().optional(),

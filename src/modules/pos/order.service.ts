@@ -46,7 +46,8 @@ export class OrderService {
   }
 
   async createOrder(data: any, branchId: string, staffId: string) {
-    const { items, customerId, paymentType, discount, tax, note } = data;
+    const { items, customerId, payment, discount, tax, note } = data;
+    const { paymentType } = payment;
 
     // Use transaction to ensure atomicity
     return prisma.$transaction(async (tx) => {
@@ -55,12 +56,15 @@ export class OrderService {
       // 1. Calculate totals and check stock
       const orderItems = [];
       for (const item of items) {
+        // Map variantId (from frontend) to productId (standard in current backend schema)
+        const productId = item.variantId || item.productId;
+        
         const product = await tx.product.findUnique({
-          where: { id: item.productId },
+          where: { id: productId },
         });
 
         if (!product) {
-          throw new AppError(`Product ${item.productId} not found`, 404);
+          throw new AppError(`Product ${productId} not found`, 404);
         }
 
         if (product.stock < item.quantity) {
@@ -107,6 +111,9 @@ export class OrderService {
         },
         include: {
           items: true,
+          branch: true,
+          staff: true,
+          customer: true
         },
       });
 
