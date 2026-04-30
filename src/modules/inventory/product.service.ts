@@ -1,5 +1,6 @@
 import { productRepository } from './product.repository';
 import { AppError } from '../../middlewares/error.middleware';
+import prisma from '../../config/db';
 
 export class ProductService {
   async getAllProducts(companyId: string, filter: any = {}) {
@@ -15,10 +16,26 @@ export class ProductService {
   }
 
   async createProduct(data: any, companyId: string) {
-    return productRepository.create({
-      ...data,
+    const { stock, minStock, branchId, ...productData } = data;
+
+    const product = await productRepository.create({
+      ...productData,
       companyId,
     });
+
+    // If branchId and stock info provided, create initial inventory record
+    if (branchId) {
+      await prisma.inventory.create({
+        data: {
+          productId: product.id,
+          branchId,
+          quantity: stock || 0,
+          minStock: minStock || 5
+        }
+      });
+    }
+
+    return product;
   }
 
   async updateProduct(id: string, data: any, companyId: string) {

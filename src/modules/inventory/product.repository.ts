@@ -13,7 +13,8 @@ export class ProductRepository extends BaseRepository<Product> {
         ...filter
       },
       include: {
-        category: true
+        category: true,
+        inventory: true
       }
     });
   }
@@ -22,7 +23,8 @@ export class ProductRepository extends BaseRepository<Product> {
     return this.model.findUnique({
       where: { id },
       include: {
-        category: true
+        category: true,
+        inventory: true
       }
     });
   }

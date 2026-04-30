@@ -59,17 +59,22 @@ export class OrderService {
         // Map variantId (from frontend) to productId (standard in current backend schema)
         const productId = item.variantId || item.productId;
         
-        const product = await tx.product.findUnique({
-          where: { id: productId },
+        // 1. Calculate totals and check stock from branch inventory
+        const inventory = await tx.inventory.findUnique({
+          where: { productId_branchId: { productId, branchId } },
         });
 
-        if (!product) {
-          throw new AppError(`Product ${productId} not found`, 404);
+        if (!inventory) {
+          throw new AppError(`Product ${productId} is not available at this branch`, 404);
         }
 
-        if (product.stock < item.quantity) {
-          throw new AppError(`Insufficient stock for product ${product.name}`, 400);
+        if (inventory.quantity < item.quantity) {
+          const product = await tx.product.findUnique({ where: { id: productId } });
+          throw new AppError(`Insufficient stock for product ${product?.name || productId}`, 400);
         }
+
+        const product = await tx.product.findUnique({ where: { id: productId } });
+        if (!product) throw new AppError(`Product ${productId} not found`, 404);
 
         const total = product.price * item.quantity;
         subtotal += total;
@@ -81,10 +86,10 @@ export class OrderService {
           total: total,
         });
 
-        // 2. Deduct stock
-        await tx.product.update({
-          where: { id: product.id },
-          data: { stock: { decrement: item.quantity } },
+        // 2. Deduct stock from branch inventory
+        await tx.inventory.update({
+          where: { id: inventory.id },
+          data: { quantity: { decrement: item.quantity } },
         });
       }
 

@@ -86,12 +86,23 @@ async function main() {
         sku: `PRD-${1000 + i}`,
         price: Math.floor(Math.random() * 500) + 50,
         cost: Math.floor(Math.random() * 250) + 20,
-        stock: Math.floor(Math.random() * 500) + 20,
-        minStock: 15,
         companyId: company.id,
         categoryId: categories[i % categories.length].id,
       }
     });
+
+    // Create inventory for EACH branch (High-Scale Multi-Tenant approach)
+    for (const branch of branches) {
+      await prisma.inventory.create({
+        data: {
+          productId: p.id,
+          branchId: branch.id,
+          quantity: Math.floor(Math.random() * 500) + 20,
+          minStock: 15,
+        }
+      });
+    }
+
     products.push(p);
   }
 
